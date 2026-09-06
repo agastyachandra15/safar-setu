@@ -6,7 +6,7 @@ import { config } from './config.js'
 
 const httpServer = createServer()
 const io = new Server(httpServer, { cors: { origin: config.corsOrigin } })
-const app = createApp(io)
+const { app } = createApp(io)
 httpServer.on('request', app)
 
 registerSocketHandlers(io)
