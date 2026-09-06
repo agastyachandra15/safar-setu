@@ -2,7 +2,7 @@ import type { Server } from 'socket.io'
 import type { Trip, Participant } from '../types.js'
 import type { TripRepository } from '../repositories/tripRepository.js'
 import { point } from '../domain/geo.js'
-import { addEvent, publicTrip, emitState, now } from '../domain/events.js'
+import { addEvent, emitState, now } from '../domain/events.js'
 import { activateFallback } from '../domain/fallback.js'
 import { randomUUID } from 'node:crypto'
 

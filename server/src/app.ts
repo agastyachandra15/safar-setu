@@ -14,12 +14,17 @@ export function createApp(io: Server) {
   const tripRepository = new TripRepository()
   const tripService = new TripService(tripRepository, io)
 
-  // Middleware
+  // Middleware (only for non-Socket.IO routes)
   app.use(cors({ origin: config.corsOrigin }))
   app.use(express.json())
 
   // Routes (inject service)
   app.use('/api', createTripsRouter(tripService))
+
+  // Handle 404 for API routes
+  app.use('/api', (_req, res) => {
+    res.status(404).json({ error: 'Not found' })
+  })
 
   // Error handler
   app.use(errorHandler)
