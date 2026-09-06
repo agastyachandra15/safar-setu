@@ -25,13 +25,13 @@ export function Driver({
       <TripHeader trip={trip} title="Driver console" subtitle="DRIVER VIEW" />
       <div className="grid two">
         <div className="panel map-panel">
-          <MapView trip={trip} />
+          <MapView trip={trip} showPassengers={false} />
           <div className="map-legend">
             <span>
               <i className="dot teal" /> Driver
             </span>
             <span>
-              <i className="dot coral" /> Passenger
+              <i className="dot coral" /> Centroid
             </span>
           </div>
         </div>
