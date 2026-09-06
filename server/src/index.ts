@@ -6,10 +6,12 @@ import { config } from './config.js'
 
 const httpServer = createServer()
 const io = new Server(httpServer, { cors: { origin: config.corsOrigin } })
-const { app } = createApp(io)
+
+const { app, tripRepository, tripService } = createApp(io)
 httpServer.on('request', app)
 
-registerSocketHandlers(io)
+// Register socket handlers with repository
+registerSocketHandlers(io, tripRepository)
 
 httpServer.listen(config.port, () => {
   console.log(`Safar Setu API listening on http://localhost:${config.port}`)
