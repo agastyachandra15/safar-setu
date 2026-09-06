@@ -20,6 +20,7 @@ export type Trip = {
   origin: string
   destination: string
   route: Point[]
+  routeIndex: number
   status: TripStatus
   currentLocation: Point
   trackingSource: 'driver' | 'passenger-fallback'

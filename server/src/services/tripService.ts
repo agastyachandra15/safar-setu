@@ -7,12 +7,20 @@ import { activateFallback } from '../domain/fallback.js'
 import { randomUUID } from 'node:crypto'
 
 const route = [
-  point(19.076, 72.8777),
-  point(19.082, 72.889),
-  point(19.092, 72.897),
-  point(19.103, 72.906),
-  point(19.115, 72.916),
-  point(19.125, 72.925),
+  point(19.076, 72.8777),   // Bandra West (start)
+  point(19.082, 72.889),    // Bandra Reclamation
+  point(19.092, 72.897),    // Turner Road
+  point(19.103, 72.906),    // Linking Road
+  point(19.115, 72.916),    // Grant Road
+  point(19.125, 72.925),    // Girgaum Chowpatty
+  point(19.135, 72.933),    // Malabar Hill
+  point(19.145, 72.938),    // Cumballa Hill
+  point(19.155, 72.942),    // Breach Candy
+  point(19.165, 72.945),    // Tardeo
+  point(19.175, 72.948),    // Worli
+  point(19.185, 72.955),    // Lower Parel
+  point(19.195, 72.962),    // Prabhadevi
+  point(19.205, 72.970),    // Dadar (end)
 ]
 
 export class TripService {
@@ -47,6 +55,7 @@ export class TripService {
       origin: input.origin || 'Bandra West',
       destination: input.destination || 'Powai Lake',
       route,
+      routeIndex: 0,
       status: 'active',
       currentLocation: route[0],
       trackingSource: 'driver',
@@ -137,14 +146,12 @@ export class TripService {
       trip.status = 'ended'
       addEvent(trip, 'trip', 'Trip ended', 'Everyone has been notified')
     } else if (action === 'move') {
-      const next = Math.min(
-        trip.route.findIndex((p) => p.lat === trip.currentLocation.lat) + 1 || 1,
-        trip.route.length - 1,
-      )
+      trip.routeIndex = Math.min(trip.routeIndex + 1, trip.route.length - 1)
+      const next = trip.routeIndex
       if (trip.status === 'fallback') {
         const cluster = trip.passengers.filter((p) => p.online)
         cluster.forEach((p) => {
-          const clusterPoint = trip.route[Math.min(next, trip.route.length - 1)]
+          const clusterPoint = trip.route[next]
           p.location = point(clusterPoint.lat + 0.0006, clusterPoint.lng + 0.0006)
           p.lastSeen = now()
           p.updates += 1

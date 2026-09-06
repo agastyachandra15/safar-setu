@@ -6,12 +6,20 @@ import { addEvent, now } from '../domain/events.js'
 export const trips = new Map<string, Trip>()
 
 export const route: Point[] = [
-  point(19.076, 72.8777),
-  point(19.082, 72.889),
-  point(19.092, 72.897),
-  point(19.103, 72.906),
-  point(19.115, 72.916),
-  point(19.125, 72.925),
+  point(19.076, 72.8777),   // Bandra West (start)
+  point(19.082, 72.889),    // Bandra Reclamation
+  point(19.092, 72.897),    // Turner Road
+  point(19.103, 72.906),    // Linking Road
+  point(19.115, 72.916),    // Grant Road
+  point(19.125, 72.925),    // Girgaum Chowpatty
+  point(19.135, 72.933),    // Malabar Hill
+  point(19.145, 72.938),    // Cumballa Hill
+  point(19.155, 72.942),    // Breach Candy
+  point(19.165, 72.945),    // Tardeo
+  point(19.175, 72.948),    // Worli
+  point(19.185, 72.955),    // Lower Parel
+  point(19.195, 72.962),    // Prabhadevi
+  point(19.205, 72.970),    // Dadar (end)
 ]
 
 export function createTrip(input: { name?: string; origin?: string; destination?: string; demoMode?: boolean }) {
@@ -33,6 +41,7 @@ export function createTrip(input: { name?: string; origin?: string; destination?
     origin: input.origin || 'Bandra West',
     destination: input.destination || 'Powai Lake',
     route,
+    routeIndex: 0,
     status: 'active',
     currentLocation: route[0],
     trackingSource: 'driver',
