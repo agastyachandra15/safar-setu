@@ -1,0 +1,142 @@
+SAFAR SETU DEMO GUIDE
+=====================
+
+Purpose
+-------
+Safar Setu demonstrates journey assurance for public bus passengers.
+The driver is the primary tracking source. If the driver loses connection,
+the system verifies passengers from the SAME trip and uses their cluster
+centroid as an approximate fallback location.
+
+Start the demo
+--------------
+1. Open PowerShell in the project folder:
+   C:\Users\agast\OneDrive\Documents\Prototype
+
+2. Install dependencies if needed:
+   npm install
+
+3. Start the frontend and backend:
+   npm run dev
+
+4. Open:
+   http://localhost:5173
+
+The frontend runs on port 5173 and the in-memory API runs on port 4000.
+No database or login is required.
+
+Recommended 2-4 minute presentation flow
+-----------------------------------------
+1. Click "Try the live demo" or "Run demo".
+   This creates one active trip with:
+   - A generated Trip ID
+   - One simulated driver
+   - Three simulated passengers: Meera, Kabir, and Nisha
+   - A simulated route and map
+
+2. Driver view
+   The Driver console initially shows:
+   - Trip status: Driver live
+   - Driver location marker
+   - Passenger markers
+   - Trip controls
+
+3. Demonstrate movement
+   Click "Send location ping".
+   The simulated driver and passengers move along the route.
+   The map and event log update in realtime.
+
+4. Demonstrate driver failure
+   Click "Simulate signal loss".
+   The driver is marked offline and the trip enters a short grace period.
+   During this period the event log shows that the driver signal was lost.
+
+5. Demonstrate passenger fallback
+   Wait approximately 6 seconds.
+   The backend then:
+   - Selects passengers belonging to this Trip ID
+   - Checks that they are close to the last known driver location
+   - Requires at least two consistent passengers
+   - Calculates their average latitude and longitude
+   - Uses that centroid as the approximate bus location
+
+   The status changes to "Passenger-assisted".
+   The map shows:
+   - The current passenger-cluster location
+   - A separate marker for the location where the driver connection was lost
+   - Passenger markers in driver and passenger views
+
+6. Show the relative view
+   Click "Track someone".
+   The relative sees the same current fallback location and status.
+   Individual passenger locations are hidden from the relative.
+   The relative still sees the driver's lost-connection marker.
+
+7. Demonstrate fallback movement
+   Return to Driver or Passenger view and click "Send location ping".
+   The simulated passenger cluster moves and its centroid becomes the new
+   fallback location. All connected views update through Socket.IO.
+
+8. Demonstrate driver recovery
+   Click "Restore my signal".
+   The system:
+   - Marks the driver online
+   - Restores driver tracking
+   - Uses the driver's current location again
+   - Removes the lost-connection marker
+   - Adds a recovery event to the log
+
+9. End the trip
+   Click "End trip".
+   The status becomes "Ended" and the trip is no longer treated as active.
+
+Passenger view
+--------------
+1. Click "Passenger".
+2. Enter the Trip ID shown in the Driver console.
+3. Click "Find trip".
+4. Enter a passenger name and click "Join".
+5. The passenger is added only to that specific trip.
+6. "Send a check-in ping" updates the passenger movement in the demo.
+
+Admin view
+----------
+The Admin page shows:
+- Active trips
+- Trips in grace/fallback recovery
+- Completed trips
+- Trip status and event history
+- A short recovery playbook
+
+Tracking states
+---------------
+Driver live:
+    The driver's location is the current tracking location.
+
+Grace period:
+    The driver is offline temporarily. The system is waiting before fallback.
+
+Passenger-assisted:
+    The passenger cluster has been verified. Its centroid is the approximate
+    current location while the driver's connection is unavailable.
+
+Driver restored:
+    The driver connection has returned and primary tracking is active again.
+
+Ended:
+    The trip has completed and active tracking has stopped.
+
+Important demo notes
+--------------------
+- This is a prototype demonstration, not a production safety algorithm.
+- State is stored in memory, so restarting the backend clears all trips.
+- The fallback only uses passengers joined to the same Trip ID.
+- The relative view does not expose individual passenger locations.
+- OpenStreetMap tiles require an internet connection. The map layout and
+  simulated coordinates still work if tiles are temporarily unavailable.
+
+Useful commands
+---------------
+npm run dev       Start frontend and backend together
+npm test          Type-check the frontend
+npm run build     Build frontend and backend for production
