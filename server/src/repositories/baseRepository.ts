@@ -1,6 +1,11 @@
 export abstract class BaseRepository<T extends { id: string }> {
   protected storage = new Map<string, T>()
 
+  // Expose storage for emitState and other operations
+  getStorage(): Map<string, T> {
+    return this.storage
+  }
+
   create(entity: T): void {
     this.storage.set(entity.id, entity)
   }
