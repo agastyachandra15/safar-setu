@@ -13,4 +13,11 @@ export function registerSocketHandlers(io: Server, tripRepository: TripRepositor
       socket.join(id)
     })
   })
+
+  // Listen for state updates from service layer and broadcast to all clients
+  // This allows real-time synchronization when any client modifies state
+  setInterval(() => {
+    const trips = tripRepository.getAll()
+    io.emit('state', { trips: trips.map(publicTrip) })
+  }, 500)
 }

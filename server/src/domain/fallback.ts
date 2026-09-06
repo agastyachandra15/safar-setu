@@ -1,11 +1,11 @@
 import type { Server } from 'socket.io'
 import type { Trip } from '../types.js'
+import type { TripRepository } from '../repositories/tripRepository.js'
 import { point } from './geo.js'
 import { distanceMeters } from './geo.js'
 import { addEvent, emitState } from './events.js'
-import { trips } from '../state/tripStore.js'
 
-export function activateFallback(trip: Trip, io: Server) {
+export function activateFallback(trip: Trip, io: Server, tripRepository: TripRepository) {
   if (trip.status !== 'grace') return
   const group = trip.passengers.filter((passenger) => passenger.online && passenger.updates >= 2)
   const nearLastKnown = group.filter((passenger) => distanceMeters(passenger.location, trip.driver.location) <= 250)
@@ -14,7 +14,7 @@ export function activateFallback(trip: Trip, io: Server) {
   )
   if (cluster.length < 2) {
     addEvent(trip, 'validation', 'Cluster not verified', 'Waiting for at least two consistent passengers within 250 m')
-    emitState(io, trips)
+    emitState(io, tripRepository.getStorage())
     return
   }
   const centroid = point(
@@ -26,5 +26,5 @@ export function activateFallback(trip: Trip, io: Server) {
   trip.trackingSource = 'passenger-fallback'
   addEvent(trip, 'validation', 'Passenger cluster verified', `Centroid of ${cluster.length} same-trip passengers is now the approximate location`)
   addEvent(trip, 'system', 'Passenger-assisted tracking active', 'Driver signal is unavailable; approximate tracking continues')
-  emitState(io, trips)
+  emitState(io, tripRepository.getStorage())
 }
