@@ -4,7 +4,13 @@ import { publicTrip } from '../domain/events.js'
 
 export function registerSocketHandlers(io: Server, tripRepository: TripRepository) {
   io.on('connection', (socket) => {
-    socket.emit('state', { trips: tripRepository.getAll().map(publicTrip) })
-    socket.on('join-trip', (id: string) => socket.join(id))
+    // Send current state on connection
+    const trips = tripRepository.getAll()
+    socket.emit('state', { trips: trips.map(publicTrip) })
+
+    // Join a specific trip's room
+    socket.on('join-trip', (id: string) => {
+      socket.join(id)
+    })
   })
 }
