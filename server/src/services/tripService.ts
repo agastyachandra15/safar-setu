@@ -16,10 +16,18 @@ const route = [
 ]
 
 export class TripService {
-  constructor(private tripRepository: TripRepository, private io: Server) {}
+  constructor(
+    private tripRepository: TripRepository,
+    private io: Server,
+  ) {}
 
   // Business logic: create a new trip
-  createTrip(input: { name?: string; origin?: string; destination?: string; demoMode?: boolean }): Trip {
+  createTrip(input: {
+    name?: string
+    origin?: string
+    destination?: string
+    demoMode?: boolean
+  }): Trip {
     const id = randomUUID()
     const created = now()
     const driver: Participant = {
@@ -31,6 +39,7 @@ export class TripService {
       online: true,
       updates: 1,
     }
+
     const trip: Trip = {
       id,
       shortId: id.slice(0, 6).toUpperCase(),
@@ -112,7 +121,7 @@ export class TripService {
       addEvent(trip, 'alert', 'Driver signal lost', 'Grace period started · looking for the driver')
       this.tripRepository.save(trip)
       emitState(this.io, this.tripRepository.getStorage())
-      setTimeout(() => activateFallback(trip, this.io), 6000)
+      setTimeout(() => activateFallback(trip, this.io, this.tripRepository), 6000)
     } else if (action === 'restore') {
       if (trip.status !== 'grace' && trip.status !== 'fallback') return null
       trip.status = 'restored'
@@ -123,12 +132,15 @@ export class TripService {
       delete trip.lostDriverLocation
       addEvent(trip, 'validation', 'Driver restored', 'Signal recovered; trip continues normally')
     } else if (action === 'validate') {
-      activateFallback(trip, this.io)
+      activateFallback(trip, this.io, this.tripRepository)
     } else if (action === 'end') {
       trip.status = 'ended'
       addEvent(trip, 'trip', 'Trip ended', 'Everyone has been notified')
     } else if (action === 'move') {
-      const next = Math.min(trip.route.findIndex((p) => p.lat === trip.currentLocation.lat) + 1 || 1, trip.route.length - 1)
+      const next = Math.min(
+        trip.route.findIndex((p) => p.lat === trip.currentLocation.lat) + 1 || 1,
+        trip.route.length - 1,
+      )
       if (trip.status === 'fallback') {
         const cluster = trip.passengers.filter((p) => p.online)
         cluster.forEach((p) => {
@@ -155,7 +167,12 @@ export class TripService {
           p.updates += 1
         })
       }
-      addEvent(trip, 'location', 'Location ping', 'Simulated driver and passenger locations updated')
+      addEvent(
+        trip,
+        'location',
+        'Location ping',
+        'Simulated driver and passenger locations updated',
+      )
     }
 
     this.tripRepository.save(trip)
